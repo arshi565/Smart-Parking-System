@@ -1,0 +1,123 @@
+<?php
+session_start();
+ if(empty($_SESSION['user_info'])){
+ echo "<script type='text/javascript'>alert('Please login before
+proceeding further!');</script>";
+ }
+$conn = mysqli_connect("localhost","root","","Customer");
+if(!$conn){
+ echo "<script type='text/javascript'>alert('Database
+failed');</script>";
+ die('Could not connect: '.mysqli_connecL_error());
+}
+if (isset($_POST['submit']))
+{
+$Location=$_POST['Location'];
+$sql = "SELECT L_no FROM Location WHERE L_name = '$Location'";
+$result = mysqli_query($conn, $sql);
+$row = mysqli_fetch_assoc($result);
+$email=$_SESSION['user_info'];
+$query="UPDATE customer SET L_no='$row[L_no]' WHERE email='$email';";
+$Ticket_ID = rand(1000,10000);
+$query2 = "INSERT INTO tickets values($Ticket_ID, 'confirmed' , $row[L_no]
+);";
+mysqli_query($conn, $query2);
+$query3 ="UPDATE location SET no_of_spots=no_of_spots-1 WHERE
+L_name='$Location';";
+mysqli_query($conn, $query3);
+ if(mysqli_query($conn, $query))
+{
+ $message = "Spot booked successfully. Your Booking ID is : $Ticket_ID
+";
+}
+ else {
+ $message="Transaction failed";
+ }
+ echo "<script type='text/javascript'>alert('$message');</script>";
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Book a Spot</title>
+ <link rel="stylesheet" href="style.css">
+ <style type="text/css">
+ #booktkt {
+ margin:auto;
+ margin-top: 120px;
+ width: 40%;
+ height: 60%;
+ padding: auto;
+ padding-top: 50px;
+ padding-left: 50px;
+ background-color: rgba(255,255,255);
+ border: 10px solid rgb(61, 61, 117);
+ border-radius: 25px;
+ }
+ html {
+ background: url(img/wallpaper1.jpg) no-repeat center center
+fixed;
+ -webkit-background-size: cover;
+ -moz-background-size: cover;
+ -o-background-size: cover;
+ background-size: cover;
+ }
+ #journeytext {
+ color: rgba(0,0,0);
+ font-size: 28px;
+ }
+ #trains {
+ margin-left: 90px;
+ font-size: 15px;
+ }
+ #submit {
+ margin-left: 180px;
+ margin-bottom: 40px;
+ margin-top: 30px
+ }
+ #parking {
+ margin-left : 120px;
+ }
+ </style>
+ <script type="text/javascript">
+ function validate() {
+ var trains=document.getElementById("trains");
+ if(trains.selectedIndex==0)
+ {
+ alert("Please select your Location");
+ trains.focus();
+ return false;
+ }
+ }
+ </script>
+</head>
+<body>
+ <?php
+ include ('header.php');
+ ?>
+ <div id="booktkt">
+ <h1 align="center" id="journeytext">Choose your
+Location</h1><br/><br/>
+ <form method="post" name="journeyform" onsubmit="return validate()">
+ <div id="parking">
+ <select id="Location" name="Location" required>
+ <option selected disabled >-------------------Select Parking
+Spot here----------------------</option>
+ <option value="Central Station" >Express- Central
+Station,Mumbai </option>
+ <option value="Pavilion Mall" >Regular - Pavilion
+Mall,Mumbai</option>
+ <option value="City Hall">VIP VALLET - City
+Hall,Kolkata</option>
+ <option value="VIT University" >Regular - VIT
+University,Vellore</option>
+ <option value="Express Avenue" >Regular - Express
+Avenue,Chennai</option>
+ </select>
+ </div id="parking">
+ <br/><br/>
+ <input type="submit" name="submit" id="submit" class="button" />
+ </form>
+ </div>
+ </body>
+ </html>
